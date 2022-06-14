@@ -29,11 +29,15 @@ const changeTheme = (ctx) => {
 const handleFirstTask = (ctx) => {
     ctx.session.set('setting_theme', false);
     ctx.session.set('chose_theme_first', false);
+
     const chosen_theme = ctx.session.get('theme');
+    const chosen_task = getTask(chosen_theme);
+
+    ctx.session.set('current_task', chosen_task);
 
     return Reply.text(`
             Выбрали тему ${chosen_theme.name}. Итак, начнём!
-            Какой метод ${getTask(chosen_theme).description}?
+            Какой метод ${chosen_task.description}?
         `);
 }
 
@@ -77,6 +81,10 @@ const handleConfirm = (ctx) => {
     }
 }
 
+const getCurrentTheme = (ctx) => {
+    return Reply.text(`Сейчас изучаем тему ${ctx.session.get('theme').name}. Вернемся к заданиям?`)
+}
+
 //основное меню Алисы
 alice.command(welcomeMatcher, ctx => {
     ctx.session.set('chose_theme_first', true);
@@ -97,6 +105,15 @@ alice.any(ctx => {
     }
     else if (getIntent(ctx, "YANDEX.CONFIRM")) {
         return handleConfirm(ctx);
+    }
+    else if (getIntent(ctx, "what_theme")) {
+        if (ctx.session.get('chose_theme_first') || ctx.session.get('setting_theme')) {
+            ctx.session.set('setting_theme', true);
+            return Reply.text(`Чтобы начать изучение нужно выбрать одну из следующих тем: ${topics_names}`)
+        }
+        else {
+            return getCurrentTheme(ctx);
+        }
     }
     else if (getIntent(ctx, "change_theme")) {
         return changeTheme(ctx);

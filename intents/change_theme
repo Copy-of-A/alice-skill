@@ -1,0 +1,27 @@
+root:
+    [$change $theme? (на $body)?]
+
+filler:
+    алиса | давай
+    
+slots:
+    theme:
+        source: $body
+        type: ELang  
+
+$change:
+    %lemma
+    другая
+    смена
+    смени
+    поменяй
+    измени
+    список
+    меняем
+
+$theme:
+    %lemma
+    тема
+
+$body:
+    .+

@@ -1,0 +1,14 @@
+root: 
+    $what $theme
+
+filler:
+    алиса | сейчас | скажи | назови
+
+$what:
+    %lemma
+    какая
+    текущая
+
+$theme:
+    %lemma
+    тема

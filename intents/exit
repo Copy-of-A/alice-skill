@@ -1,0 +1,34 @@
+root:
+    $method? $name
+
+filler: 
+    %lemma
+    объект
+    коллекция
+    прототип     
+
+slots:
+    name:
+        source: $name
+        type: ELang
+      
+
+$method:
+    %lemma
+    метод
+
+$name:
+    %lemma
+    массив
+    строка
+    %exact
+    эррэй
+    array
+    стринг
+    string
+    мап
+    мэп
+    map
+    сет
+    set
+    сэт
