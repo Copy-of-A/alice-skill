@@ -1,5 +1,6 @@
 "use strict";
 const { Alice, Reply, Scene, Stage } = require('yandex-dialogs-sdk');
+const { sample } = require('lodash');
 const alice = new Alice();
 
 // общие импорты и константы
@@ -8,6 +9,8 @@ const topics = db.map((el) => el.name);
 const topics_names = topics.join(", ");
 const welcomeMatcher = ctx => ctx.data.session.new === true;
 const getIntent = (ctx, intent) => ctx.nlu.intents.hasOwnProperty(intent);
+const congratulations = ["Отлично", "Супер", "Правильно"];
+const nextTask = ["Следующее задание", "Дальше", "Продолжим"];
 
 // обработчики интентов
 const exit = () => Reply.text('До свидания!', {
@@ -26,6 +29,7 @@ const changeTheme = (ctx) => {
     return Reply.text(`Хорошо. Давай выберем другую тему. Выбери одну из этих: ${new_themes.join(", ")}`)
 }
 
+// функция выбора первого задания
 const handleFirstTask = (ctx) => {
     ctx.session.set('setting_theme', false);
     ctx.session.set('chose_theme_first', false);
@@ -52,6 +56,7 @@ const chooseTheme = (input, ctx) => {
     })
     if (chosen_theme) {
         ctx.session.set('theme', chosen_theme);
+        ctx.session.set('current_task', null);
         return handleFirstTask(ctx);
     }
     else {
@@ -63,6 +68,14 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+const currentQuestion = (ctx) => {
+    return `Какой метод ${ctx.session.get('current_task').description}?`
+}
+
+const handleWrongAnswer = (ctx) => {
+    return Reply.text(`Неправильно, попробуй ещё раз. ${currentQuestion(ctx)}`);
+}
+
 // функция получения нового задания в теме
 const getTask = (theme) => {
     return theme.tasks[getRandomInt(theme.tasks.length)]
@@ -72,9 +85,11 @@ const handleConfirm = (ctx) => {
     if (ctx.session.get('theme') && ctx.session.get('chose_theme_first')) {
         return handleFirstTask(ctx);
     }
-    //!!!!!!!!!!!!!!!!!!!!вот тут ещё нужна будет обработка да когда уже выбрали тему
     else if (ctx.session.get('setting_theme')) {
         return noSuchTheme();
+    }
+    else if (ctx.session.get('current_task')) {
+        return handleWrongAnswer(ctx);
     }
     else {
         return Reply.text(`Не поняла что вы сказали? ${JSON.stringify(ctx.nlu.intents)}`);
@@ -82,7 +97,25 @@ const handleConfirm = (ctx) => {
 }
 
 const getCurrentTheme = (ctx) => {
-    return Reply.text(`Сейчас изучаем тему ${ctx.session.get('theme').name}. Вернемся к заданиям?`)
+    return Reply.text(`Сейчас изучаем тему ${ctx.session.get('theme').name}. 
+    Сейчас на вопросе: ${currentQuestion(ctx)}`)
+}
+
+const getNextTask = (ctx) => {
+    const new_task = getTask(ctx.session.get('theme'));
+    ctx.session.set('current_task', new_task);
+    return Reply.text(`${sample(congratulations)}! ${sample(nextTask)}. 
+    Какой метод ${new_task.description}`);
+}
+
+const getAnswer = (ctx) => {
+    const right_answers = [ctx.session.get('current_task').name, ctx.session.get('current_task').tts_name]
+    if (right_answers.some((el) => ctx.message.includes(el))) {
+        return getNextTask(ctx);
+    }
+    else {
+        return handleWrongAnswer(ctx);
+    }
 }
 
 //основное меню Алисы
@@ -108,6 +141,7 @@ alice.any(ctx => {
     }
     else if (getIntent(ctx, "what_theme")) {
         if (ctx.session.get('chose_theme_first') || ctx.session.get('setting_theme')) {
+            ctx.session.set('chose_theme_first', false);
             ctx.session.set('setting_theme', true);
             return Reply.text(`Чтобы начать изучение нужно выбрать одну из следующих тем: ${topics_names}`)
         }
@@ -118,11 +152,14 @@ alice.any(ctx => {
     else if (getIntent(ctx, "change_theme")) {
         return changeTheme(ctx);
     }
-    else if (getIntent(ctx, "choose_theme")) {
+    else if (getIntent(ctx, "choose_theme") && !ctx.session.get('current_task')) {
         return chooseTheme(ctx.nlu.intents.choose_theme.slots.name.value.toLowerCase(), ctx);
     }
     else if (ctx.session.get('setting_theme')) {
         return chooseTheme(ctx.command, ctx);
+    }
+    else if (ctx.session.get('current_task')) {
+        return getAnswer(ctx);
     }
     else {
         if (ctx.session.get('chose_theme_first')) {
