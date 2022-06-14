@@ -64,14 +64,17 @@ const chooseTheme = (input, ctx) => {
     }
 }
 
+// функция получения случайного числа
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+// Функция получения текста текущего задания
 const currentQuestion = (ctx) => {
     return `Какой метод ${ctx.session.get('current_task').description}?`
 }
 
+// Функция обработки неверного ответа
 const handleWrongAnswer = (ctx) => {
     return Reply.text(`Неправильно, попробуй ещё раз. ${currentQuestion(ctx)}`);
 }
@@ -81,6 +84,7 @@ const getTask = (theme) => {
     return theme.tasks[getRandomInt(theme.tasks.length)]
 }
 
+// Функция обработки ответов "да"
 const handleConfirm = (ctx) => {
     if (ctx.session.get('theme') && ctx.session.get('chose_theme_first')) {
         return handleFirstTask(ctx);
@@ -96,11 +100,13 @@ const handleConfirm = (ctx) => {
     }
 }
 
+// Функция получения текущей темы
 const getCurrentTheme = (ctx) => {
     return Reply.text(`Сейчас изучаем тему ${ctx.session.get('theme').name}. 
     Сейчас на вопросе: ${currentQuestion(ctx)}`)
 }
 
+// Функция получения следующего задания
 const getNextTask = (ctx) => {
     const new_task = getTask(ctx.session.get('theme'));
     ctx.session.set('current_task', new_task);
@@ -108,6 +114,7 @@ const getNextTask = (ctx) => {
     Какой метод ${new_task.description}`);
 }
 
+// Функция обработки правильности ответа на вопрос
 const getAnswer = (ctx) => {
     const right_answers = [ctx.session.get('current_task').name, ctx.session.get('current_task').tts_name]
     if (right_answers.some((el) => ctx.message.includes(el))) {
