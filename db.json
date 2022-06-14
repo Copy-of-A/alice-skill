@@ -1,0 +1,194 @@
+[
+    {
+        "id": 0,
+        "name": "методы массивов",
+        "activation_names": ["массив", "массива", "массивов", "массивы", "эррэй", "array"],
+        "description": "",
+        "tasks": [
+            {
+                "id": 0,
+                "name": "push",
+                "tts_name": "пуш",
+                "card_name": "arr.push(...items)",
+                "description": "добавляет элементы в конец",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 1,
+                "name": "pop",
+                "tts_name": "поп",
+                "card_name": "arr.pop()",
+                "description": "извлекает элементы с конца",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 2,
+                "name": "shift",
+                "tts_name": "шифт",
+                "card_name": "arr.shift()",
+                "description": "извлекает элементы с конца",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 2,
+                "name": "unshift",
+                "tts_name": "аншифт",
+                "card_name": "arr.unshift(...items)",
+                "description": "извлекает элементы с начала",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            }
+        ]
+    },
+    {
+        "id": 1,
+        "name": "методы строк",
+        "activation_names": ["строк", "строки", "строк", "стринг", "string"],
+        "description": "",
+        "tasks": [
+            {
+                "id": 0,
+                "name": "slice",
+                "tts_name": "слайс",
+                "card_name": "str.slice(start, [end])",
+                "description": "извлекает часть строки и возвращает новую строку без изменения оригинальной строки",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 0,
+                "name": "substring",
+                "tts_name": "сабстринг",
+                "card_name": "str.substring(start, [end])",
+                "description": "возвращает подстроку строки между двумя индексами, или от одного индекса и до конца строки",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 0,
+                "name": "subst",
+                "tts_name": "субстр",
+                "card_name": "str.substr(start[, length])",
+                "description": "возвращает указанное количество символов из строки, начиная с указанной позиции",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            }
+        ]
+    },
+    {
+        "id": 1,
+        "name": "методы map",
+        "activation_names": ["мэп", "мап", "map"],
+        "description": "",
+        "tasks": [
+            {
+                "id": 0,
+                "name": "set",
+                "tts_name": "сет",
+                "card_name": "map.set(key, value)",
+                "description": "записывает по ключу key значение value",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 1,
+                "name": "keys",
+                "tts_name": "кийз",
+                "card_name": "map.keys()",
+                "description": "возвращает итерируемый объект по ключам",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 2,
+                "name": "values",
+                "tts_name": "вэльюз",
+                "card_name": "map.values()",
+                "description": "возвращает итерируемый объект по значениям",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 3,
+                "name": "entries",
+                "tts_name": "энтриз",
+                "card_name": "map.entries()",
+                "description": "возвращает итерируемый объект по парам ключ значение",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            }
+        ]
+    },
+    {
+        "id": 1,
+        "name": "методы set",
+        "activation_names": ["сэт", "сет", "set"],
+        "description": "",
+        "tasks": [
+            {
+                "id": 0,
+                "name": "add",
+                "tts_name": "эдд'",
+                "card_name": "set.add(value)",
+                "description": "добавляет новый элемент с заданным значением в конец объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 0,
+                "name": "has",
+                "tts_name": "эдд",
+                "card_name": "set.has(value)",
+                "description": "возвращает логическое значение, показывающее, существует ли элемент с указанным значением в объекте  Set или нет",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 0,
+                "name": "delete",
+                "tts_name": "эдд'",
+                "card_name": "set.delete(value)",
+                "description": "даляет уникальный элемент из объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 0,
+                "name": "clear",
+                "tts_name": "клиа",
+                "card_name": "set.clear()",
+                "description": "удаляет все элементы из объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 0,
+                "name": "size",
+                "tts_name": "сайз'",
+                "card_name": "set.size()",
+                "description": "добавляет новый элемент с заданным значением в конец объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            }
+        ]
+    } 
+]

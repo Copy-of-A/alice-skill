@@ -1,0 +1,29 @@
+{
+  "name": "learn-js-alice",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "dev": "nodemon -h --inspect"
+  },
+  "private": true,
+  "keywords": [],
+  "author": "Alla Manshina",
+  "license": "ISC",
+  "dependencies": {
+    "node-fetch": "^3.2.5",
+    "yandex-dialogs-sdk": "^2.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Copy-of-A/alice-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Copy-of-A/alice-skill/issues"
+  },
+  "homepage": "https://github.com/Copy-of-A/alice-skill#readme"
+}
