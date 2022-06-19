@@ -36,7 +36,7 @@
                 "lastTry": false
             },
             {
-                "id": 2,
+                "id": 3,
                 "name": "unshift",
                 "tts_name": "аншифт",
                 "card_name": "arr.unshift(...items)",
@@ -64,7 +64,7 @@
                 "lastTry": false
             },
             {
-                "id": 0,
+                "id": 1,
                 "name": "substring",
                 "tts_name": "сабстринг",
                 "card_name": "str.substring(start, [end])",
@@ -74,7 +74,7 @@
                 "lastTry": false
             },
             {
-                "id": 0,
+                "id": 2,
                 "name": "subst",
                 "tts_name": "субстр",
                 "card_name": "str.substr(start[, length])",
@@ -86,8 +86,8 @@
         ]
     },
     {
-        "id": 1,
-        "name": "методы map",
+        "id": 2,
+        "name": "методы Map",
         "activation_names": ["мэп", "мап", "map"],
         "description": "",
         "tasks": [
@@ -112,7 +112,7 @@
                 "lastTry": false
             },
             {
-                "id": 2,
+                "id":2,
                 "name": "values",
                 "tts_name": "вэльюз",
                 "card_name": "map.values()",
@@ -134,8 +134,8 @@
         ]
     },
     {
-        "id": 1,
-        "name": "методы set",
+        "id": 3,
+        "name": "методы Set",
         "activation_names": ["сэт", "сет", "set"],
         "description": "",
         "tasks": [
@@ -150,7 +150,7 @@
                 "lastTry": false
             },
             {
-                "id": 0,
+                "id": 1,
                 "name": "has",
                 "tts_name": "эдд",
                 "card_name": "set.has(value)",
@@ -160,7 +160,7 @@
                 "lastTry": false
             },
             {
-                "id": 0,
+                "id": 2,
                 "name": "delete",
                 "tts_name": "эдд'",
                 "card_name": "set.delete(value)",
@@ -170,7 +170,7 @@
                 "lastTry": false
             },
             {
-                "id": 0,
+                "id": 3,
                 "name": "clear",
                 "tts_name": "клиа",
                 "card_name": "set.clear()",
@@ -180,7 +180,65 @@
                 "lastTry": false
             },
             {
+                "id": 4,
+                "name": "size",
+                "tts_name": "сайз'",
+                "card_name": "set.size()",
+                "description": "добавляет новый элемент с заданным значением в конец объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            }
+        ]
+    } ,
+    {
+        "id": 4,
+        "name": "методы Promise",
+        "activation_names": ["промис", "промисы", "promise"],
+        "description": "",
+        "tasks": [
+            {
                 "id": 0,
+                "name": "add",
+                "tts_name": "эдд'",
+                "card_name": "set.add(value)",
+                "description": "добавляет новый элемент с заданным значением в конец объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 1,
+                "name": "has",
+                "tts_name": "эдд",
+                "card_name": "set.has(value)",
+                "description": "возвращает логическое значение, показывающее, существует ли элемент с указанным значением в объекте  Set или нет",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 2,
+                "name": "delete",
+                "tts_name": "эдд'",
+                "card_name": "set.delete(value)",
+                "description": "даляет уникальный элемент из объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 3,
+                "name": "clear",
+                "tts_name": "клиа",
+                "card_name": "set.clear()",
+                "description": "удаляет все элементы из объекта Set",
+                "theme": 0,
+                "visited": false,
+                "lastTry": false
+            },
+            {
+                "id": 4,
                 "name": "size",
                 "tts_name": "сайз'",
                 "card_name": "set.size()",
