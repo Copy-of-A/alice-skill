@@ -40,6 +40,7 @@ const changeTheme = (ctx) => {
 const handleFirstTask = (ctx) => {
     ctx.session.set('setting_theme', false);
     ctx.session.set('chose_theme_first', false);
+    ctx.session.set("errorsCount", 0);
 
     const chosen_theme = ctx.session.get('theme');
     const chosen_task = getTask(chosen_theme);
@@ -87,12 +88,18 @@ const currentQuestion = (ctx) => {
 
 // Функция обработки неверного ответа
 const handleWrongAnswer = (ctx) => {
-    return Reply.text(`Неправильно, попробуй ещё раз. ${currentQuestion(ctx)}`);
+    ctx.session.set("errorsCount", +ctx.session.get("errorsCount") + 1);
+    if (+ctx.session.get("errorsCount") === 3) {
+        return getAnswer(ctx, true);
+    }
+    else {
+        return Reply.text(`Неправильно, попробуй ещё раз. ${currentQuestion(ctx)}`);
+    }
 }
 
 // функция получения нового задания в теме
 const getTask = (theme) => {
-    return theme.tasks[getRandomInt(theme.tasks.length)]
+    return theme.tasks[getRandomInt(theme.tasks.length)];
 }
 
 // Функция обработки ответов "да"
@@ -122,6 +129,7 @@ const getNextTask = (ctx) => {
     const new_task = getTask(ctx.session.get('theme'));
     ctx.session.set('current_task', new_task);
     ctx.session.set('hint', null);
+    ctx.session.set("errorsCount", 0);
     return new_task;
 }
 
@@ -129,7 +137,7 @@ const getNextTask = (ctx) => {
 const getNextTaskCongratsWrapper = (ctx) => {
     const new_task = getNextTask(ctx);
     return Reply.text(`${sample(congratulations)}! ${sample(nextTask)}. 
-        Какой метод ${new_task.description}`
+        Какой метод ${new_task.description}?`
     );
 }
 
@@ -145,10 +153,11 @@ const checkAnswer = (ctx) => {
 }
 
 // Функция обработки интента ответ
-const getAnswer = (ctx) => {
+const getAnswer = (ctx, withErrors) => {
+    const extraText = withErrors ? "Запоминай! " : ""
     return Reply.text(`
-        Метод, который ${ctx.session.get('current_task').description}, называется ${ctx.session.get('current_task').name}.
-        Следующее задание: ${getNextTask(ctx)}
+        ${extraText}Метод, который ${ctx.session.get('current_task').description}, называется ${ctx.session.get('current_task').name}.
+        Следующее задание: Какой метод ${getNextTask(ctx).description}?
     `)
 }
 
