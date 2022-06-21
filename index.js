@@ -1,7 +1,30 @@
-"use strict";
+
 const { Alice, Reply, Scene, Stage } = require('yandex-dialogs-sdk');
 const { sample, shuffle } = require('lodash');
 const alice = new Alice();
+
+// const firebase = require('firebase');
+const { getFirestore, doc, getDoc } = require('firebase/firestore/lite');
+const { initializeApp } = require("firebase/app");
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA37KedzZR8hZNCI3fKsvCCb1n9NzFbx10",
+    authDomain: "alise-skill-js.firebaseapp.com",
+    databaseURL: "https://alise-skill-js-default-rtdb.firebaseio.com",
+    projectId: "alise-skill-js",
+    storageBucket: "alise-skill-js.appspot.com",
+    messagingSenderId: "522198308214",
+    appId: "1:522198308214:web:d8c54f45b32742d54cd657",
+    measurementId: "G-EG0RZ6N0PK"
+};
+const app = initializeApp(firebaseConfig);
+// const database = getFirestore(app);
+// const dataBase = firebase.database();
+
+const { getDatabase, ref, set } = require("firebase/database");
+
+// const pushRef = database.ref(`users/215F89EF8672157BEAFBF1FAD073EFA3896A974CD3AF0AD422573290D031D741`).push();
+// pushRef.set({ tasks: db });
 
 // общие импорты и константы
 const db = require('./db.json');
@@ -12,16 +35,43 @@ const getIntent = (ctx, intent) => ctx.nlu.intents.hasOwnProperty(intent);
 const congratulations = ["Отлично", "Супер", "Правильно"];
 const nextTask = ["Следующее задание", "Дальше", "Продолжим"];
 
+// const { getAuth, signInAnonymously } = require("firebase/auth");
+// const database = getDatabase();
+
+// const auth = getAuth();
+// signInAnonymously(auth)
+//   .then(() => {
+//     set(ref(database, 'users/'), {tasks: 1});
+//   })
+//   .catch((error) => {
+//     const errorCode = error.code;
+//     const errorMessage = error.message;
+//     // ...
+//   });
+
+
 // обработчики интентов
 const exit = () => Reply.text('До свидания!', {
     end_session: true,
 });
-const helpHandler = (ctx) => Reply.text(`
+const helpHandler = (ctx) => {
+    let extra_text;
+    console.log("ctx.session.get(chose_theme_first", ctx.session.get("chose_theme_first"))
+    if (ctx.session.get("chose_theme_first")) {
+        ctx.session.set('chose_theme_first', false);
+        ctx.session.set('setting_theme', true);
+        extra_text = `Чтобы начать изучение нужно выбрать одну из следующих тем: ${topics_names}`;
+    }
+    else {
+        extra_text = `Сейчас изучаем тему ${ctx.session.get('theme')}.
+        Сейчас на вопросе: Какой метод ${ctx.session.get('current_task').description}?`
+    }
+    return Reply.text(`
     Чтобы выйти из навыка скажите стоп. 
     Вы можете сменить тему или узнать статистику.
-    Сейчас изучаем тему методы массивов.
-    Сейчас на вопросе: Какой метод извлекает элементы с начала?
-`);
+    ${extra_text}
+`)
+};
 const noSuchTheme = () => Reply.text(`Такой темы нет. Выбери одну из этих: ${topics_names}`);
 
 const youNeedToChooseThemeText = () => Reply.text(`Чтобы начать изучение нужно выбрать одну из следующих тем: ${topics_names}`);
@@ -201,7 +251,7 @@ alice.command(welcomeMatcher, ctx => {
 
 alice.any(ctx => {
     if (getIntent(ctx, "help")) {
-        return helpHandler();
+        return helpHandler(ctx);
     }
     else if (getIntent(ctx, "exit")) {
         return exit();
@@ -228,10 +278,10 @@ alice.any(ctx => {
     else if (getIntent(ctx, "choose_theme") && !ctx.session.get('current_task')) {
         return chooseTheme(ctx.nlu.intents.choose_theme.slots.name.value.toLowerCase(), ctx);
     }
-    else if (getIntent(ctx, "answer") && ctx.session.get('current_task')) {
+    else if (getIntent(ctx, "answer") && ctx.session.get('current_task') && !ctx.session.get('chose_theme_first')) {
         return getAnswer(ctx);
     }
-    else if (getIntent(ctx, "hint") && ctx.session.get('current_task')) {
+    else if (getIntent(ctx, "hint") && ctx.session.get('current_task') && !ctx.session.get('chose_theme_first')) {
         if (ctx.session.get('hint')) {
             return Reply.text(`Один из этих ответов верный: ${ctx.session.get('hint')}`)
         }
