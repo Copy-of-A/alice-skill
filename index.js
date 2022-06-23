@@ -1,5 +1,5 @@
 "use strict";
-const { Alice, Reply, Scene, Stage } = require('yandex-dialogs-sdk');
+const { Alice, Reply } = require('yandex-dialogs-sdk');
 const { sample, shuffle } = require('lodash');
 const alice = new Alice();
 
@@ -103,7 +103,6 @@ const handleFirstTask = (ctx) => {
 // функция выбора темы для соответствующего интента или когда мы в соответсвующем контексе
 const chooseTheme = (input, ctx) => {
     let chosen_theme = null;
-    console.log("input", input);
     db.forEach((theme) => {
         if (theme.activation_names.some((el) => el.includes(input))) {
             chosen_theme = theme;
@@ -151,17 +150,11 @@ async function getTask(theme, ctx) {
         if (Array.isArray(result)) {
             if (result.length >= theme.tasks.length) {
                 const only_new_tasks = theme.tasks.filter((el) => el.id !== ctx.session.get("current_task"));
-                console.log("теперь кроме последнего")
-                const res = only_new_tasks[getRandomInt(only_new_tasks.length)];
-                console.log("res", res);
-                return res
+                return only_new_tasks[getRandomInt(only_new_tasks.length)];
             }
             else {
                 const only_new_tasks = theme.tasks.filter((el) => !result.includes(el.id));
-                console.log("only_new_tasks", only_new_tasks.map(el => el.id))
-                const res = only_new_tasks[getRandomInt(only_new_tasks.length)];
-                console.log("res", res);
-                return res
+                return only_new_tasks[getRandomInt(only_new_tasks.length)];
             }
         }
         else {
@@ -357,8 +350,6 @@ async function getVisitedTasks(ctx) {
     return botDb.getUserInfo(ctx.userId, ctx.session.get("theme").id)
         .then(info => {
             if (info) {
-                console.log(info)
-                console.log(info.length)
                 return info.filter((el) => isFinite(el)).length
             }
             else return 0
