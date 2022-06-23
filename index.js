@@ -90,14 +90,14 @@ const handleFirstTask = (ctx) => {
     ctx.session.set("errorsCount", 0);
 
     const chosen_theme = ctx.session.get('theme');
-    const chosen_task = getTask(chosen_theme, ctx);
+    return getTask(chosen_theme, ctx).then(chosen_task => {
+        ctx.session.set('current_task', chosen_task);
 
-    ctx.session.set('current_task', chosen_task);
-
-    return Reply.text(`
-            Выбрали тему ${chosen_theme.name}. Итак, начнём!
-            ${makeQuestion(chosen_task.description)}
-        `);
+        return Reply.text(`
+                Выбрали тему ${chosen_theme.name}. Итак, начнём!
+                ${makeQuestion(chosen_task.description)}
+            `);
+    });
 }
 
 // функция выбора темы для соответствующего интента или когда мы в соответсвующем контексе
@@ -146,15 +146,28 @@ const handleWrongAnswer = (ctx) => {
 }
 
 // функция получения нового задания в теме
-const getTask = (theme, ctx) => {
-    botDb.getUserInfo(ctx.userId, theme.id).then(result => {
-        console.log("result", result)
+async function getTask(theme, ctx) {
+    return botDb.getUserInfo(ctx.userId, theme.id).then(result => {
         if (Array.isArray(result)) {
-            const only_new_tasks = theme.tasks.filter((el) => !result.includes(el.id));
-            console.log("only_new_tasks", only_new_tasks);
+            if (result.length >= theme.tasks.length) {
+                const only_new_tasks = theme.tasks.filter((el) => el.id !== ctx.session.get("current_task"));
+                console.log("теперь кроме последнего")
+                const res = only_new_tasks[getRandomInt(only_new_tasks.length)];
+                console.log("res", res);
+                return res
+            }
+            else {
+                const only_new_tasks = theme.tasks.filter((el) => !result.includes(el.id));
+                console.log("only_new_tasks", only_new_tasks.map(el => el.id))
+                const res = only_new_tasks[getRandomInt(only_new_tasks.length)];
+                console.log("res", res);
+                return res
+            }
+        }
+        else {
+            return theme.tasks[getRandomInt(theme.tasks.length)]
         }
     })
-    return theme.tasks[getRandomInt(theme.tasks.length)];
 }
 
 // Функция обработки ответов "да"
@@ -181,11 +194,12 @@ const getCurrentTheme = (ctx) => {
 
 // Функция получения следующего задания
 const getNextTask = (ctx) => {
-    const new_task = getTask(ctx.session.get('theme'), ctx)
-    ctx.session.set('current_task', new_task);
-    ctx.session.set('hint', null);
-    ctx.session.set("errorsCount", 0);
-    return new_task;
+    return getTask(ctx.session.get('theme'), ctx).then(new_task => {
+        ctx.session.set('current_task', new_task);
+        ctx.session.set('hint', null);
+        ctx.session.set("errorsCount", 0);
+        return new_task;
+    })
 }
 
 // Функция-обёртка для получения следующего задания с поздравлением
