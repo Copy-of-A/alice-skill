@@ -11,6 +11,42 @@ const welcomeMatcher = ctx => ctx.data.session.new === true;
 const getIntent = (ctx, intent) => ctx.nlu.intents.hasOwnProperty(intent);
 const congratulations = ["Отлично", "Супер", "Правильно"];
 const nextTask = ["Следующее задание", "Дальше", "Продолжим"];
+const makeQuestion = (question) => `Какой метод ${question}?`
+
+const { initializeApp } = require("firebase/app");
+const { getDatabase } = require("firebase/database");
+const firebaseConfig = {
+    apiKey: "AIzaSyA37KedzZR8hZNCI3fKsvCCb1n9NzFbx10",
+    authDomain: "alise-skill-js.firebaseapp.com",
+    databaseURL: "https://alise-skill-js-default-rtdb.firebaseio.com",
+    projectId: "alise-skill-js",
+    storageBucket: "alise-skill-js.appspot.com",
+    messagingSenderId: "522198308214",
+    appId: "1:522198308214:web:d8c54f45b32742d54cd657",
+};
+const app = initializeApp(firebaseConfig);
+
+const database = getDatabase();
+const Db = require('./db/db.js');
+var botDb = new Db(database);
+
+const questionsWords = [
+    "вопрос", "вопроса", "вопросов"
+]
+
+const getQuestionWordFromNumber = (number) => {
+    const last_digit = number % 10;
+    const pre_last_digit = Math.floor((number / 10) % 10);
+    if (last_digit === 1) {
+        if (pre_last_digit === 1) return questionsWords[2]
+        else return questionsWords[0]
+    }
+    else if (last_digit === 2 || last_digit === 3 || last_digit === 4) {
+        if (pre_last_digit === 1) return questionsWords[2]
+        else return questionsWords[1]
+    }
+    else return questionsWords[2]
+}
 
 // обработчики интентов
 const exit = () => Reply.text('До свидания!', {
@@ -25,7 +61,7 @@ const helpHandler = (ctx) => {
     }
     else {
         extra_text = `Сейчас изучаем тему ${ctx.session.get('theme')}.
-        Сейчас на вопросе: Какой метод ${ctx.session.get('current_task').description}?`
+        Сейчас на вопросе: ${makeQuestion(ctx.session.get('current_task').description)}`
     }
     return Reply.text(`
     Чтобы выйти из навыка скажите стоп. 
@@ -54,19 +90,20 @@ const handleFirstTask = (ctx) => {
     ctx.session.set("errorsCount", 0);
 
     const chosen_theme = ctx.session.get('theme');
-    const chosen_task = getTask(chosen_theme);
+    const chosen_task = getTask(chosen_theme, ctx);
 
     ctx.session.set('current_task', chosen_task);
 
     return Reply.text(`
             Выбрали тему ${chosen_theme.name}. Итак, начнём!
-            Какой метод ${chosen_task.description}?
+            ${makeQuestion(chosen_task.description)}
         `);
 }
 
 // функция выбора темы для соответствующего интента или когда мы в соответсвующем контексе
 const chooseTheme = (input, ctx) => {
     let chosen_theme = null;
+    console.log("input", input);
     db.forEach((theme) => {
         if (theme.activation_names.some((el) => el.includes(input))) {
             chosen_theme = theme;
@@ -94,7 +131,7 @@ function getRandomInt(max, last, second) {
 
 // Функция получения текста текущего задания
 const currentQuestion = (ctx) => {
-    return `Какой метод ${ctx.session.get('current_task').description}?`
+    return `${makeQuestion(ctx.session.get('current_task').description)}`
 }
 
 // Функция обработки неверного ответа
@@ -109,7 +146,14 @@ const handleWrongAnswer = (ctx) => {
 }
 
 // функция получения нового задания в теме
-const getTask = (theme) => {
+const getTask = (theme, ctx) => {
+    botDb.getUserInfo(ctx.userId, theme.id).then(result => {
+        console.log("result", result)
+        if (Array.isArray(result)) {
+            const only_new_tasks = theme.tasks.filter((el) => !result.includes(el.id));
+            console.log("only_new_tasks", only_new_tasks);
+        }
+    })
     return theme.tasks[getRandomInt(theme.tasks.length)];
 }
 
@@ -137,7 +181,7 @@ const getCurrentTheme = (ctx) => {
 
 // Функция получения следующего задания
 const getNextTask = (ctx) => {
-    const new_task = getTask(ctx.session.get('theme'));
+    const new_task = getTask(ctx.session.get('theme'), ctx)
     ctx.session.set('current_task', new_task);
     ctx.session.set('hint', null);
     ctx.session.set("errorsCount", 0);
@@ -148,14 +192,19 @@ const getNextTask = (ctx) => {
 const getNextTaskCongratsWrapper = (ctx) => {
     const new_task = getNextTask(ctx);
     return Reply.text(`${sample(congratulations)}! ${sample(nextTask)}. 
-        Какой метод ${new_task.description}?`
+        ${makeQuestion(new_task.description)}`
     );
 }
 
 // Функция обработки правильности ответа на вопрос
 const checkAnswer = (ctx) => {
-    const right_answers = [ctx.session.get('current_task').name, ctx.session.get('current_task').tts_name]
+    const right_answers = [ctx.session.get('current_task').name, ctx.session.get('current_task').tts_name.split('+').join('')]
     if (right_answers.some((el) => ctx.message.includes(el))) {
+        botDb.updateLastTheme(ctx.userId, ctx.session.get("theme").id)
+        botDb.getUserInfo(ctx.userId, ctx.session.get("theme").id).then(info => {
+            const arr = Array.isArray(info) ? [...info.filter((el) => isFinite(el))] : [];
+            if (!arr.includes(ctx.session.get('current_task').id)) botDb.updateUserInfo(ctx.userId, ctx.session.get("theme").id, [...arr, ctx.session.get('current_task').id])
+        });
         return getNextTaskCongratsWrapper(ctx);
     }
     else {
@@ -168,7 +217,7 @@ const getAnswer = (ctx, withErrors) => {
     const extraText = withErrors ? "Запоминай! " : ""
     return Reply.text(`
         ${extraText}Метод, который ${ctx.session.get('current_task').description}, называется ${ctx.session.get('current_task').name}.
-        Следующее задание: Какой метод ${getNextTask(ctx).description}?
+        Следующее задание: ${makeQuestion(getNextTask(ctx).description)}
     `)
 }
 
@@ -194,20 +243,46 @@ const getHint = (ctx) => {
 `)
 }
 
-const getStatistics = (ctx) => Reply.text(`
-    Изучено 6 вопросов из 21 по теме методы массивов.
-    Следующий вопрос: Какой метод извлекает элементы с начала?
-`)
+// Функция обработки интента статистики
+const getStatistics = (ctx) => {
+    return getVisitedTasks(ctx).then(result => {
+        if (result === 0 || !result) {
+            return Reply.text(`
+            Пока не изучено ни одного вопроса по теме ${ctx.session.get("theme").name}.
+            Давайте начнем изучение с вопроса: ${makeQuestion(ctx.session.get('current_task').description)}
+        `)
+        }
+        return Reply.text(`
+        Изучено ${result} ${getQuestionWordFromNumber(result)} из ${ctx.session.get("theme").tasks.length} по теме ${ctx.session.get("theme").name}.
+        Остановились на вопросе: ${makeQuestion(ctx.session.get('current_task').description)}
+    `)
+    })
+}
 
 //основное меню Алисы
 alice.command(welcomeMatcher, ctx => {
-    ctx.session.set('chose_theme_first', true);
-    ctx.session.set('theme', db[0]);
-    return Reply.text(`
-        Привет! Я помогу выучить методы различных объектов языка JavaScript.
-        В любой момент Вы можете поменять тему или спросить что я умею. 
-        Предлагаю начать с темы ${topics[0]}. Приступим? 
-    `)
+    return botDb.getUser(ctx.userId).then(user => {
+        ctx.session.set('chose_theme_first', true);
+        if (user && isFinite(user.lastTheme)) {
+            const last_theme = db.find((el) => el.id === user.lastTheme);
+            ctx.session.set('theme', last_theme);
+            ctx.session.set('old_user', true);
+            return Reply.text(`
+            Привет! Я помогу выучить методы различных объектов языка JavaScript.
+            В любой момент Вы можете поменять тему или спросить что я умею. 
+            Остановились на теме ${last_theme.name}. Продолжим? 
+        `)
+        }
+        else {
+            botDb.getOrCreateUser(ctx.userId);
+            ctx.session.set('theme', db[0]);
+            return Reply.text(`
+                Привет! Я помогу выучить методы различных объектов языка JavaScript.
+                В любой момент Вы можете поменять тему или спросить что я умею. 
+                Предлагаю начать с темы ${topics[0]}. Приступим? 
+            `)
+        }
+    });
 });
 
 alice.any(ctx => {
@@ -233,7 +308,7 @@ alice.any(ctx => {
     else if (getIntent(ctx, "change_theme")) {
         return changeTheme(ctx);
     }
-    else if (getIntent(ctx, "statistics")) {
+    else if (getIntent(ctx, "statistics") && (!ctx.session.get('chose_theme_first') || ctx.session.get('old_user'))) {
         return getStatistics(ctx);
     }
     else if (getIntent(ctx, "choose_theme") && !ctx.session.get('current_task')) {
@@ -264,8 +339,16 @@ alice.any(ctx => {
     }
 })
 
-// alice.on('response', ctx => {
-//     console.log(ctx.session);
-// })
+async function getVisitedTasks(ctx) {
+    return botDb.getUserInfo(ctx.userId, ctx.session.get("theme").id)
+        .then(info => {
+            if (info) {
+                console.log(info)
+                console.log(info.length)
+                return info.filter((el) => isFinite(el)).length
+            }
+            else return 0
+        });
+};
 
 const server = alice.listen(process.env.post || 3333, '/');
